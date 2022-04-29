@@ -1,0 +1,95 @@
+﻿@using MockSchoolManagement.Extensions
+@using MockSchoolManagement.Application.Dtos
+@model PagedResultDto<Student>
+@{
+    ViewBag.Title = "学生列表";
+}
+
+<h1>学生列表</h1>
+<form asp-action="Index" method="get">
+    <div class="form-actions no-color">
+        <p>请输入名称:
+            <input  type="text"  name="FilterText"  value="@ViewBag.CurrentFilter" />
+            <input type="submit" value="查询" class="btn btn-outline-dark" /> |
+            <a asp-action="Index">返回所有列表</a>|
+            <a asp-action="Create">添加学生</a>
+        </p>
+    </div>
+</form>
+
+<div class="row">
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th scope="col">头像</th>
+                <th scope="col" class="sort-link">
+                    <a asp-action="Index" asp-route-Sorting="Name"  
+                        asp-route-CurrentPage="@Model.CurrentPage" asp-route-FilterText="@Model.FilterText">名字</a>
+                    <a class="pl-3" asp-action="Index" asp-route-Sorting="Name desc"
+                        asp-route-CurrentPage="@Model.CurrentPage" asp-route-FilterText="@Model.FilterText">降序</a>
+                </th>
+                <th>
+                    <a asp-action="Index" asp-route-Sorting="Email "
+                        asp-route-CurrentPage="@Model.CurrentPage" asp-route-FilterText="@Model.FilterText">邮箱地址</a>
+                    <a class="pl-3" asp-action="Index" asp-route-Sorting="Email desc"
+                        asp-route-CurrentPage="@Model.CurrentPage" asp-route-FilterText="@Model.FilterText">降序</a>
+                </th>
+                <th scope="col">
+                    <a class="pl-3" asp-action="Index" asp-route-Sorting="Major ">主修科目</a>
+                    <a class="pl-3" asp-action="Index" asp-route-Sorting="Major desc">降序</a>
+                </th>
+                <th scope="col">
+                    <a class="pl-3" asp-action="Index" asp-route-Sorting="Major "
+                        asp-route-CurrentPage="@Model.CurrentPage" asp-route-FilterText="@Model.FilterText">入学时间</a>
+                    <a  class="pl-3"  asp-action="Index"  asp-route-Sorting="EnrollmentDate desc"
+                        asp-route-CurrentPage="@Model.CurrentPage" asp-route-FilterText="@Model.FilterText">降序</a>
+                </th>
+                <th scope="col">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var student in Model.Data)
+            {
+                var photoPath = "../images/ayanami.png";
+                if(student.PhotoPath!= null) 
+                {
+                    photoPath = "../images/avatars/" + student.PhotoPath;
+                }
+                <tr>
+                    <td><img class="table-img imageThumbnail" src="@photoPath" asp-append-version="true" /></td>
+                    <th scope="row">@student.Name</th>
+                    <td>@student.Email</td>
+                    
+                    <td>@student.Major.GetDisplayName()</td>
+                    <td>@student.EnrollmentDate.ToString("yyyy-MM-dd")</td>
+                    <td>
+                        <form method="post" asp-action="DeleteUser" asp-route-id="@student.Id" >
+                            <a  asp-controller="Home" class="btn btn-info" asp-action="Details" asp-route-id="@student.Id" >查看</a>
+                            <a asp-controller="home"  asp-action="edit" asp-route-id="@student.Id" class="btn btn-primary m-1">编辑</a>
+                            
+                            <span id="confirmDeleteSpan_@student.Id" style="display:none">
+                                <span>您确定您要删除?</span>
+                                <button type="submit" class="btn btn-danger">是</button>
+                                <a href="#" class="btn btn-primary" onclick="confirmDelete('@student.Id', false)" >否</a>
+                            </span>
+                            
+                            <span id="deleteSpan_@student.Id">
+                                <a href="#" class="btn btn-danger" onclick="confirmDelete('@student.Id', true)"  >删除</a>
+                            </span>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @await Html.PartialAsync("_Pagination")
+    @*<partial name="_Pagination" />*@
+
+</div>
+
+@section Scripts{
+    <script src="../js/CustomScript.js" asp-append-version="true"> </script>
+}
+
+
